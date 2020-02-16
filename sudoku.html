@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+
+<span style=float:right;>©®™Ⓚ</span>
+<h1 style="background: #EEE;">Supa—Sudoku!!!</h1>
+<table id=sudoku border=1>
+</table>
+<button onclick="while (findsomething()) {}">Find everything</button>
+<button onclick="if (!findsomething()) alert('didnt find anything');">Find something</button>
+<button onclick="alert(findone(0,0));">Find at 0,0</button>
+<button onclick="for (var i = 0; i < 10; i++) table[Math.floor(Math.random() * 9)][Math.floor(Math.random() * 9)] = 0; showTable();">Delete 10 random</button>
+<button onclick="var tl = document.getElementById('tableload'), tlc = tl.cloneNode(), j = (i)=>JSON.stringify(table[i]); tlc.innerText = '['+[j(0),j(1),j(2),'\n'+j(3),j(4),j(5),'\n'+j(6),j(7),j(8)]+']'; tl.parentNode.insertBefore(tlc, tl.nextSibling);">Save current board</button>
+<!--button onclick="try { var t = prompt('Input board:'); if (t) { table = JSON.parse(t); showTable(); } } catch(e) { alert('Error! ' + e); }">Input board...</button!-->
+
+<br><button onclick="table = JSON.parse(this.innerText); showTable();">
+	[[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],<br>
+	 [0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],<br>
+	 [0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0]]</button>
+<button onclick="table = JSON.parse(this.innerText); showTable();">
+	[[0,5,0,6,0,4,0,0,0],[3,0,0,0,1,5,0,0,0],[7,6,4,0,9,0,0,0,0],<br>
+	 [6,0,0,0,0,0,7,0,0],[8,0,0,3,2,7,0,0,5],[0,0,2,0,0,0,0,0,3],<br>
+	 [0,0,0,0,3,0,1,7,9],[0,0,0,7,5,0,0,0,6],[0,0,0,1,0,9,0,3,0]]</button>
+<button id=tableload onclick="table = JSON.parse(this.innerText); showTable();">
+	[[1,2,3,4,5,6,7,8,9],[4,5,6,7,8,9,1,2,3],[7,8,9,1,2,3,4,5,6],<br>
+	 [2,3,4,5,6,7,8,9,1],[5,6,7,8,9,1,2,3,4],[8,9,1,2,3,4,5,6,7],<br>
+	 [3,4,5,6,7,8,9,1,2],[6,7,8,9,1,2,3,4,5],[9,1,2,3,4,5,6,7,8]]</button>
+	 <br>
+
+
+<table style="display:none;" id=display border=1>
+	<tr><td>row1:</td><td>1</td></tr>
+	<tr><td>row2:</td><td>1</td></tr>
+</table>
+
+<style>
+table
+{
+	border-collapse: collapse;
+	float: left;
+}
+table td
+{
+	width: 1.2em;
+	height: 1.2em;
+	text-align: center;
+}
+</style>
+
+<script type=text/javascript>
+
+var table = [], rows = [], columns = [], squares = [];
+
+table = [[0,5,0,6,0,4,0,0,0],[3,0,0,0,1,5,0,0,0],[7,6,4,0,9,0,0,0,0],[6,0,0,0,0,0,7,0,0],[8,0,0,3,2,7,0,0,5],[0,0,2,0,0,0,0,0,3],[0,0,0,0,3,0,1,7,9],[0,0,0,7,5,0,0,0,6],[0,0,0,1,0,9,0,3,0]];
+//table.push([0,2,3,4,5,6,7,8,9]);
+/*for (var r = 0; r < 9; r++)
+{
+	table.push([0,0,0,0,0,0,0,0,0]);
+}*/
+
+showTable();
+
+function showTable()
+{
+	document.getElementById('sudoku').innerHTML = "";
+
+	for (var r = 0; r < 9; r++)
+	{
+		var row = table[r], tr = document.createElement('tr');
+		document.getElementById('sudoku').appendChild(tr);
+		
+		for (var c = 0; c < 9; c++)
+		{
+			//row[c] = null;//Math.random() < 0.2 ? Math.round(Math.random()*8+1) : null;
+
+			var td = document.createElement('td');
+			tr.appendChild(td);
+			if (c%3 == 0) td.style.borderLeft = "solid 2px black";
+			if (c == 8) td.style.borderRight = "solid 2px black";
+			if (r%3 == 0) td.style.borderTop = "solid 2px black";
+			if (r == 8) td.style.borderBottom = "solid 2px black";
+			if ((r-r%3)%2!=(c-c%3)%2) td.style.background = "#EEE";
+			
+			var div = document.createElement('div');
+			td.appendChild(div);
+			div.contentEditable = true;
+			div.oninput = (()=> { var rx = r, cx = c, divx = div; return () => { var v = parseInt(new String(divx.innerText).trim()) || 0; console.log([rx,cx,divx.innerText,v]); table[rx][cx] = v; recalc(); } })();
+			//div.onfocus = (()=> { var rx = r, cx = c, divx = div; return () => { alert([rx,cx]) } })();
+			div.innerHTML = row[c] ? row[c] : "";
+		}
+	}
+}
+
+function findsomething()
+{
+	for (var r = 0; r < 9; r++)
+	{
+		for (var c = 0; c < 9; c++)
+		{
+			if (!table[r][c])
+			{
+				//alert('checking ' + [r,c]);
+				var answer = findone(r,c);
+				if (answer)
+				{
+					table[r][c] = answer;
+					//alert("found " + answer + " at " + [(r+1),(c+1)]);
+					showTable();
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+function findadjacent(r,c,inRow,inCol,inSquare)
+{
+	var locs = [];
+	
+	// note this duplicates locs unnecessarily
+	
+	if (inRow)
+		for (var colInRow = 0; colInRow < 9; colInRow++)
+			locs.push([r,colInRow]);
+	
+	if (inCol)
+		for (var rowInCol = 0; rowInCol < 9; rowInCol++)
+			locs.push([rowInCol,c]);
+	
+	if (inSquare)
+		for (var rowInSquare = 0; rowInSquare < 3; rowInSquare++)
+			for (var colInSquare = 0; colInSquare < 3; colInSquare++)
+				locs.push([r-r%3+rowInSquare,c-c%3+colInSquare]);
+	
+	return locs;
+}
+
+function falsifyoptions(r,c,adjacent,options)
+{
+	for (var i = 0; i < adjacent.length; i++)
+		if (table[adjacent[i][0]][adjacent[i][1]])
+			options[table[adjacent[i][0]][adjacent[i][1]]-1] = false;
+	return options;
+}
+
+function findone(r,c)
+{
+	// for a given square, check all numbers already populated in its row, column, and square. if there is but one possibility left then return it.
+	var options = falsifyoptions(r,c,findadjacent(r,c,true,true,true),[true,true,true,true,true,true,true,true,true]);
+	
+	// if we found only one option, that's it.
+	function findOneOption()
+	{
+		var theOption = 0;
+		for (var o = 0; o < 9; o++)
+			if (options[o] && !theOption)
+				theOption = o+1;
+			else if (options[o])
+				return;
+		return theOption;
+	}
+	var theOption = findOneOption();
+	if (theOption)
+		return theOption;
+
+	/*var options = [true,true,true,true,true,true,true,true,true];
+
+	var adjacent = findadjacent(r,c);
+	//alert(JSON.stringify(adjacent));
+	for (var i = 0; i < adjacent.length; i++)
+		if (table[adjacent[i][0]][adjacent[i][1]])
+			options[table[adjacent[i][0]][adjacent[i][1]]-1] = false;*/
+	
+	// if there is only one number this square can be then fine. But if there is more than one, do another check for each; can that number be ruled out from being in any other location in the square, the row, or the column? For example [0,0] can be 1,2 or 9 by direct elimination. 1 could also be at [0,2], 2 could be at [1,2], and 9 could be in any of the other 3. Not a hit. But the procedure is: for all options, for all adjacents, is that an option at any of those adjacents? we need to test row, col, and square individually.
+	
+	var tries = [findadjacent(r,c,true,false,false), findadjacent(r,c,false,true,false), findadjacent(r,c,false,false,true)];
+	for (var thisTry = 0; thisTry < tries.length; thisTry++)
+	{
+		var adjacent = tries[thisTry];
+
+		var testoptions = [false,false,false,false,false,false,false,false,false];
+		for (var a = 0; a < adjacent.length; a++)
+		{
+			// for THIS adjacent (say [0,2])....what are its adjacents, and could any of these harbor a 1?
+			if (adjacent[a][0] == r && adjacent[a][1] == c)
+				continue;
+			if (table[adjacent[a][0]][adjacent[a][1]])
+				continue;
+				
+			var testadjacent = findadjacent(adjacent[a][0],adjacent[a][1],true,true,true);
+			
+			for (var ta = 0; ta < testadjacent.length; ta++)
+			{
+				// we don't want the original square to be an adjacent, because the whole point is that it could be a 1
+				if (testadjacent[ta][0] == r && testadjacent[ta][1] == c)
+					continue;
+				if (table[testadjacent[ta][0]][testadjacent[ta][1]])
+					continue;
+				
+				var taOptions = falsifyoptions(testadjacent[ta][0],testadjacent[ta][1],testadjacent,[true,true,true,true,true,true,true,true,true]);
+				for (var ti = 0; ti < 9; ti++)
+					testoptions[ti] = testoptions[ti] || taOptions[ti];	// if it's possible HERE, it's generally possible.
+			}
+		}
+		
+		// if a testoptions[] is true, that means somewhere in this adjacency group, there could be that number. if it's false, there can't be that number anywhere. it must be correct.
+		for (var o = 0; o < 9; o++)
+			if (options[o] && !testoptions[o])
+			{
+				// the original square was postulated to be 1. analysis of this adjacency group shows that nothing else in it could be 1. so this must be a 1
+				//debugger;
+				//alert('assumed ' + (o+1) + ' at ' + [r,c]);
+				return o+1;
+			}
+	}
+	
+	// dunno about this square.
+	return 0;
+}
+
+recalc();
+function recalc()
+{
+	// for each of the 81 sqaures, 
+	/*var out = "";
+	
+	for (var r = 0; r < 9; r++)
+	{
+	}
+
+	var out = table.map((row) => { return "<tr><td>" + row.map((c) => { return "<td>" + (c===null?"":c) + "</td>"; }) + "</tr>"; });
+	alert(out);
+	document.getElementById('display').innerHTML = out.join('\n');*/
+}
+
+</script>
