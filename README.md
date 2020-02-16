@@ -1,2 +1,2 @@
 # sudoku
-Quick Javascript Sudoku solver
+Quick HTML5 Sudoku solver
